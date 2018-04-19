@@ -1,6 +1,12 @@
-package com.example.demo;
+package com.example.demo.controller;
 
+import com.example.demo.models.dto.DemoDto;
+import com.example.demo.models.entity.DemoEntity;
+import com.example.demo.repository.DemoRepository;
+import com.example.demo.repository.DemoSpecifications;
+import com.example.demo.service.DemoService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,8 +24,12 @@ public class DemoController {
     @Autowired
     private DemoService demoService;
 
+    @Autowired
+    private DemoRepository demoRepository;
+
     @PersistenceContext
     EntityManager entityManager;
+
 
     @GetMapping("/helloWorld")
     public ResponseEntity<String> helloWord() {
@@ -45,16 +55,16 @@ public class DemoController {
     public ResponseEntity<DemoEntity> getDemo() {
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
 
-        CriteriaQuery<DemoEntity> query = criteriaBuilder.createQuery(DemoEntity.class);
-        Root<DemoEntity> root = query.from(DemoEntity.class);
+//        CriteriaQuery<DemoEntity> query = criteriaBuilder.createQuery(DemoEntity.class);
+//        Root<DemoEntity> root = query.from(DemoEntity.class);
 
-        Predicate isOlder = criteriaBuilder.gt(root.get("age"), 18);
-        Predicate isStartWith = criteriaBuilder.like(root.get("name"), "Atis");
-        Predicate isYounger = criteriaBuilder.le(root.get("age"), 30);
+        Specification<DemoEntity> demoEntitySpecification = DemoSpecifications.demoSpecification1();
+        List<DemoEntity> all = demoRepository.findAll(demoEntitySpecification);
 
-        query.where(criteriaBuilder.and(isOlder, isStartWith, isYounger));
-        List<DemoEntity> resultList = entityManager.createQuery(query.select(root)).getResultList();
-        return ResponseEntity.ok(resultList.get(0));
+
+//        query.where(demoEntitySpecification);
+//        List<DemoEntity> resultList = entityManager.createQuery(query.select(root)).getResultList();
+        return ResponseEntity.ok(all.get(0));
     }
 
     @DeleteMapping("/demo")
